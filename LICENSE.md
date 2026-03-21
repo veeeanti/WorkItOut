@@ -25,5 +25,5 @@ For more information, please refer to <https://unlicense.org>
 
 ==========
 
-In other words, I don't give a fuck what anyone does with it on their own forks. Just do not, and I repeat DO NOT, include any malicious code of any kind intended to cause harm to the end user.
+In other words, I don't give a fuck what anyone does with it on their own forks. Just do not, and I repeat DO NOT, include any malicious code of any kind intended to cause harm to the end user. NO SELLING THIS EITHER!!! It will always be FREE no matter what.
 ~vee<3
