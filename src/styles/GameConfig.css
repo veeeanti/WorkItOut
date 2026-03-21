@@ -1,0 +1,129 @@
+.game-config-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.game-config-container h2 {
+  margin-bottom: 8px;
+  font-size: 24px;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+}
+
+.game-config-container > p {
+  color: #777;
+  margin-bottom: 24px;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Add game form */
+.add-game-form {
+  background: linear-gradient(135deg, var(--accent-low) 0%, var(--accent-dim) 100%);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  box-shadow: 0 0 15px var(--accent-dim);
+  align-items: flex-end;
+}
+
+.input-field {
+  flex: 1;
+  min-width: 200px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.add-game-form .btn-primary {
+  align-self: flex-end;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Games list */
+.games-list {
+  background: linear-gradient(135deg, var(--accent-low) 0%, var(--accent-dim) 100%);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0 15px var(--accent-dim);
+}
+
+.games-list h3 {
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Games table */
+.games-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.games-table thead {
+  border-bottom: 2px solid var(--accent-border);
+}
+
+.games-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.games-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #ddd;
+}
+
+.path-cell {
+  color: #999;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.games-table .btn-danger {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.games-table tbody tr:hover {
+  background: var(--accent-dim);
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .add-game-form {
+    flex-direction: column;
+  }
+
+  .add-game-form .btn-primary {
+    align-self: stretch;
+  }
+
+  .games-table {
+    font-size: 12px;
+  }
+
+  .games-table th,
+  .games-table td {
+    padding: 8px;
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "defaults": {
+    "downloadsDirectory": "./mods-download"
+  },
+  "games": {
+    "Rivals of Aether": {
+      "modsDirectory": "%USERPROFILE%\\AppData\\Local\\RivalsofAether\\workshop"
+    }
+  }
+}
