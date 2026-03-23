@@ -2,7 +2,8 @@ name: Build
 
 on:
   push:
-    tags: v*.*.*
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build:
@@ -59,3 +60,28 @@ jobs:
           path: |
             release/**/*
           retention-days: 5
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/**/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
