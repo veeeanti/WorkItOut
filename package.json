@@ -1,6 +1,6 @@
 {
   "name": "workitout",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "WorkItOut desktop mod manager",
   "main": "dist-electron/main/main.js",
   "author": {
