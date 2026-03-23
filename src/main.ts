@@ -212,9 +212,21 @@ ipcMain.handle('download-mod', async (event, modId: string) => {
   return await modService.downloadMod(modId)
 })
 
-ipcMain.handle('install-mod', async (event, modId: string, gameName: string) => {
+ipcMain.handle('install-mod', async (event, modId: string, gameName?: string) => {
   ucLog('IPC: install-mod', 'info', { modId, gameName })
   return await modService.installMod(modId, gameName)
+})
+
+ipcMain.handle('get-installed-mods', async () => {
+  return await modService.getInstalledMods()
+})
+
+ipcMain.handle('is-mod-installed', async (event, modId: string) => {
+  return await modService.isModInstalled(modId)
+})
+
+ipcMain.handle('remove-installed-mod', async (event, modId: string) => {
+  return await modService.removeInstalledMod(modId)
 })
 
 ipcMain.handle('get-config', async () => {

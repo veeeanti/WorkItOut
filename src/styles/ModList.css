@@ -236,11 +236,37 @@
   flex-direction: column;
   gap: 12px;
   margin-top: auto;
+  align-items: stretch;
 }
 
 .mod-actions button {
   width: 100%;
   font-family: 'JetBrains Mono', monospace;
+}
+
+.installed-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.15) 0%, rgba(46, 204, 113, 0.05) 100%);
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  border-radius: 6px;
+  color: #2ecc71;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-remove {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.15) 0%, rgba(231, 76, 60, 0.05) 100%);
+  border: 1px solid rgba(231, 76, 60, 0.4);
+  color: #e74c3c;
+}
+
+.btn-remove:hover {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.25) 0%, rgba(231, 76, 60, 0.15) 100%);
+  border-color: #e74c3c;
 }
 
 .install-section {

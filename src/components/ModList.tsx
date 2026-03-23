@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { Mod, ModManagerConfig } from '../types/index.ts'
 import '../styles/ModList.css'
 
+interface InstalledMod {
+  modId: string
+  modName: string
+  gameName: string
+  installedAt: string
+}
+
 interface ModListProps {
   mods: Mod[]
   config: ModManagerConfig | null
@@ -13,6 +20,8 @@ function ModList({ mods, config, onDownload, onInstall }: ModListProps) {
   const [selectedMod, setSelectedMod] = useState<string | null>(null)
   const [selectedGame, setSelectedGame] = useState<string>('')
   const [selectedFilterGame, setSelectedFilterGame] = useState<string>('all')
+  const [installedMods, setInstalledMods] = useState<InstalledMod[]>([])
+  const [installing, setInstalling] = useState<string | null>(null)
 
   const installGames = config ? Object.keys(config.games) : []
   const filterGames = Array.from(
@@ -23,6 +32,21 @@ function ModList({ mods, config, onDownload, onInstall }: ModListProps) {
     selectedFilterGame === 'all'
       ? mods
       : mods.filter(mod => mod.gameName === selectedFilterGame)
+
+  useEffect(() => {
+    loadInstalledMods()
+  }, [])
+
+  const loadInstalledMods = async () => {
+    try {
+      if (window?.modService?.getInstalledMods) {
+        const installed = await window.modService.getInstalledMods()
+        setInstalledMods(installed)
+      }
+    } catch (error) {
+      console.error('Error loading installed mods:', error)
+    }
+  }
 
   useEffect(() => {
     const nextVisibleMods =
@@ -48,6 +72,48 @@ function ModList({ mods, config, onDownload, onInstall }: ModListProps) {
   }
 
   const currentMod = filteredMods.find(mod => mod.id === selectedMod) || filteredMods[0] || null
+
+  useEffect(() => {
+    if (currentMod && currentMod.gameName && config?.games[currentMod.gameName]) {
+      setSelectedGame(currentMod.gameName)
+    }
+  }, [config, currentMod])
+
+  const isModInstalled = (modId: string): boolean => {
+    return installedMods.some(m => m.modId === modId)
+  }
+
+  const handleInstall = async (modId: string) => {
+    if (!window?.modService?.installMod) return
+    
+    setInstalling(modId)
+    try {
+      await window.modService.installMod(modId)
+      await loadInstalledMods()
+      alert(`Successfully installed mod!`)
+    } catch (error) {
+      console.error('Error installing mod:', error)
+      alert(`Failed to install mod: ${error}`)
+    } finally {
+      setInstalling(null)
+    }
+  }
+
+  const handleRemove = async (modId: string) => {
+    if (!window?.modService?.removeInstalledMod) return
+    
+    const confirmed = confirm('Are you sure you want to remove this mod?')
+    if (!confirmed) return
+
+    try {
+      await window.modService.removeInstalledMod(modId)
+      await loadInstalledMods()
+      alert('Mod removed successfully!')
+    } catch (error) {
+      console.error('Error removing mod:', error)
+      alert(`Failed to remove mod: ${error}`)
+    }
+  }
 
   return (
     <div className="mod-list-container">
@@ -150,32 +216,25 @@ function ModList({ mods, config, onDownload, onInstall }: ModListProps) {
           ) : null}
 
           <div className="mod-actions">
-            <button className="btn btn-download" onClick={() => onDownload(currentMod.id, currentMod.name)}>
-              ⬇ Download
-            </button>
-
-            <div className="install-section">
-              <label htmlFor="game-select">Install to:</label>
-              <select
-                id="game-select"
-                value={selectedGame}
-                onChange={event => setSelectedGame(event.target.value)}
-              >
-                <option value="">Select a game...</option>
-                {installGames.map(game => (
-                  <option key={game} value={game}>
-                    {game}
-                  </option>
-                ))}
-              </select>
+            {isModInstalled(currentMod.id) ? (
+              <>
+                <span className="installed-badge">✓ Installed</span>
+                <button
+                  className="btn btn-remove"
+                  onClick={() => handleRemove(currentMod.id)}
+                >
+                  🗑 Remove
+                </button>
+              </>
+            ) : (
               <button
                 className="btn btn-install"
-                onClick={() => selectedGame && onInstall(currentMod.id, selectedGame)}
-                disabled={!selectedGame}
+                onClick={() => handleInstall(currentMod.id)}
+                disabled={installing === currentMod.id}
               >
-                📦 Install
+                {installing === currentMod.id ? 'Installing...' : '⬇ Download & Install'}
               </button>
-            </div>
+            )}
           </div>
         </div>
       ) : (

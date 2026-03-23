@@ -10,8 +10,16 @@ const SITE_BASE = 'https://vee-anti.xyz'
 const API_WORKSHOP_URL = `${SITE_BASE}/api/workshop`
 const WORKSHOP_URL = `${SITE_BASE}/workshop`
 const CONFIG_PATH = path.join(process.cwd(), 'config.json')
+const INSTALLED_MODS_PATH = path.join(process.cwd(), 'installed-mods.json')
 const DOWNLOADS_DIR = path.join(process.cwd(), 'mods-download')
 const execFileAsync = promisify(execFile)
+
+export interface InstalledMod {
+  modId: string
+  modName: string
+  gameName: string
+  installedAt: string
+}
 
 interface WorkshopApiMod {
   id: number
@@ -177,6 +185,77 @@ export class ModService {
     await fs.writeFile(CONFIG_PATH, JSON.stringify(this.config, null, 2))
   }
 
+  private async loadInstalledMods(): Promise<InstalledMod[]> {
+    try {
+      const data = await fs.readFile(INSTALLED_MODS_PATH, 'utf-8')
+      return JSON.parse(data)
+    } catch {
+      return []
+    }
+  }
+
+  private async saveInstalledMods(mods: InstalledMod[]): Promise<void> {
+    await fs.writeFile(INSTALLED_MODS_PATH, JSON.stringify(mods, null, 2))
+  }
+
+  async getInstalledMods(): Promise<InstalledMod[]> {
+    return this.loadInstalledMods()
+  }
+
+  async isModInstalled(modId: string): Promise<boolean> {
+    const installed = await this.loadInstalledMods()
+    return installed.some(m => m.modId === modId)
+  }
+
+  async removeInstalledMod(modId: string): Promise<boolean> {
+    const installed = await this.loadInstalledMods()
+    const mod = installed.find(m => m.modId === modId)
+    
+    if (!mod) {
+      return false
+    }
+
+    const config = await this.loadConfig()
+    const gameConfig = config.games[mod.gameName]
+    
+    if (!gameConfig) {
+      const filtered = installed.filter(m => m.modId !== modId)
+      await this.saveInstalledMods(filtered)
+      return true
+    }
+
+    let gameModPath = gameConfig.modsDirectory
+
+    if (gameModPath.startsWith('~')) {
+      const os = require('os')
+      gameModPath = path.join(os.homedir(), gameModPath.slice(1))
+    }
+
+    gameModPath = gameModPath.replace(/%([^%]+)%/g, (_, varName) => process.env[varName] || '')
+
+    try {
+      const entries = await fs.readdir(gameModPath)
+      for (const entry of entries) {
+        if (entry.toLowerCase().includes(mod.modName.toLowerCase()) || 
+            entry.toLowerCase().includes(modId.toLowerCase())) {
+          const entryPath = path.join(gameModPath, entry)
+          const stat = await fs.stat(entryPath)
+          if (stat.isDirectory()) {
+            await fs.rm(entryPath, { recursive: true })
+          } else {
+            await fs.unlink(entryPath)
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Could not clean mod directory:', error)
+    }
+
+    const filtered = installed.filter(m => m.modId !== modId)
+    await this.saveInstalledMods(filtered)
+    return true
+  }
+
   private mapApiModToMod(apiMod: WorkshopApiMod, authorName: string): Mod {
     return {
       id: apiMod.workshop_id,
@@ -336,13 +415,28 @@ export class ModService {
     throw new Error('ZIP extraction fallback is only implemented for Windows.')
   }
 
-  async installMod(modId: string, gameName: string): Promise<boolean> {
+  async installMod(modId: string, gameName?: string): Promise<boolean> {
     try {
       const config = await this.loadConfig()
-      const gameConfig = config.games[gameName]
+      const mods = await this.fetchMods()
+      const mod = mods.find(m => m.id === modId)
+
+      if (!mod) {
+        throw new Error(`Mod ${modId} not found`)
+      }
+
+      const modName = mod.name || modId
+      const detectedGameName = mod.gameName || gameName
+
+      if (!detectedGameName) {
+        throw new Error('Could not determine game for this mod. Please specify manually.')
+      }
+
+      const targetGameName = detectedGameName
+      const gameConfig = config.games[targetGameName]
 
       if (!gameConfig) {
-        throw new Error(`Game "${gameName}" is not configured. Please add it in Game Configuration first.`)
+        throw new Error(`Game "${targetGameName}" is not configured. Please add it in Game Configuration first.`)
       }
 
       let gameModPath = gameConfig.modsDirectory
@@ -357,21 +451,34 @@ export class ModService {
       console.log(`Installing to: ${gameModPath}`)
 
       const downloadPath = await this.downloadMod(modId)
-      const mods = await this.fetchMods()
-      const mod = mods.find(m => m.id === modId)
-      const modName = mod?.name || modId
 
       const isZip = downloadPath.toLowerCase().endsWith('.zip')
 
       if (isZip) {
         await this.extractZip(downloadPath, gameModPath)
-        console.log(`Successfully installed "${modName}" to ${gameName}`)
+        console.log(`Successfully installed "${modName}" to ${targetGameName}`)
       } else {
         await fs.mkdir(gameModPath, { recursive: true })
         const fileName = path.basename(downloadPath)
         const destPath = path.join(gameModPath, fileName)
         await fs.copyFile(downloadPath, destPath)
         console.log(`Copied "${modName}" to ${destPath}`)
+      }
+
+      const installedMods = await this.loadInstalledMods()
+      installedMods.push({
+        modId,
+        modName,
+        gameName: targetGameName,
+        installedAt: new Date().toISOString(),
+      })
+      await this.saveInstalledMods(installedMods)
+
+      try {
+        await fs.unlink(downloadPath)
+        console.log(`Deleted cached download: ${downloadPath}`)
+      } catch {
+        console.warn('Could not delete cached download')
       }
 
       return true

@@ -5,7 +5,10 @@ contextBridge.exposeInMainWorld('modService', {
   // Mod operations
   getMods: () => ipcRenderer.invoke('get-mods'),
   downloadMod: (modId: string) => ipcRenderer.invoke('download-mod', modId),
-  installMod: (modId: string, gameName: string) => ipcRenderer.invoke('install-mod', modId, gameName),
+  installMod: (modId: string, gameName?: string) => ipcRenderer.invoke('install-mod', modId, gameName),
+  getInstalledMods: () => ipcRenderer.invoke('get-installed-mods'),
+  isModInstalled: (modId: string) => ipcRenderer.invoke('is-mod-installed', modId),
+  removeInstalledMod: (modId: string) => ipcRenderer.invoke('remove-installed-mod', modId),
   
   // Config operations
   getConfig: () => ipcRenderer.invoke('get-config'),
