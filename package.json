@@ -56,7 +56,7 @@
         "zip"
       ],
       "icon": "build/icon.ico",
-      "publisherName": "veeanti",
+      "publisherName": "veeeanti",
       "legalTrademarks": "UnionCrax",
       "signAndEditExecutable": false
     },
@@ -79,7 +79,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "veeanti",
+      "owner": "veeeanti",
       "repo": "WorkItOut"
     }
   },
