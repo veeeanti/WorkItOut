@@ -47,7 +47,8 @@ jobs:
         with:
           name: windows-artifacts
           path: |
-            release/**/*
+            release/*.exe
+            release/*.zip
           retention-days: 5
 
       - name: Upload Linux artifacts
@@ -56,7 +57,7 @@ jobs:
         with:
           name: linux-artifacts
           path: |
-            release/**/*
+            release/*.AppImage
           retention-days: 5
 
   release:
@@ -79,7 +80,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release/**/*
+            release/*.exe
+            release/*.zip
+            release/*.AppImage
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
