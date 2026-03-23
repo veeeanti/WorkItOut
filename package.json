@@ -72,11 +72,9 @@
     },
     "linux": {
       "target": [
-        "AppImage",
-        "deb",
-        "rpm"
+        "AppImage"
       ],
-      "icon": "build/icons",
+      "icon": "build/icon.png",
       "category": "Utility"
     },
     "publish": {
