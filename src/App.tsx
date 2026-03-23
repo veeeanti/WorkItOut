@@ -19,6 +19,10 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>('mods')
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  const supportedGames = Array.from(
+    new Set(mods.map(mod => mod.gameName?.trim()).filter((game): game is string => Boolean(game))),
+  ).sort((left, right) => left.localeCompare(right))
+
   useEffect(() => {
     loadInitialData()
   }, [])
@@ -162,7 +166,11 @@ function App() {
             />
           </>
         ) : activeTab === 'config' ? (
-          <GameConfig config={config} onUpdate={loadInitialData} />
+          <GameConfig
+            config={config}
+            supportedGames={supportedGames}
+            onUpdate={loadInitialData}
+          />
         ) : (
           <Settings
             prefs={userPrefs}

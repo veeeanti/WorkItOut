@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ModManagerConfig } from '../types/index.ts'
 import '../styles/GameConfig.css'
 
 interface GameConfigProps {
   config: ModManagerConfig | null
+  supportedGames: string[]
   onUpdate: () => void
 }
 
-function GameConfig({ config, onUpdate }: GameConfigProps) {
+function GameConfig({ config, supportedGames, onUpdate }: GameConfigProps) {
   const [gameName, setGameName] = useState('')
   const [gameModsDirectory, setGameModsDirectory] = useState('')
   const [defaultDownloadsDirectory, setDefaultDownloadsDirectory] = useState('')
   const [games, setGames] = useState<Record<string, string>>({})
+
+  const availableGames = useMemo(
+    () => supportedGames.filter(name => !games[name]),
+    [games, supportedGames],
+  )
 
   useEffect(() => {
     if (config) {
@@ -24,9 +30,20 @@ function GameConfig({ config, onUpdate }: GameConfigProps) {
     }
   }, [config])
 
+  useEffect(() => {
+    if (availableGames.length === 0) {
+      setGameName('')
+      return
+    }
+
+    if (!gameName || !availableGames.includes(gameName)) {
+      setGameName(availableGames[0])
+    }
+  }, [availableGames, gameName])
+
   const handleAddGame = async () => {
     if (!gameName || !gameModsDirectory) {
-      alert('Please enter both game name and mods directory')
+      alert('Please select a game and enter a mods directory')
       return
     }
 
@@ -122,13 +139,22 @@ function GameConfig({ config, onUpdate }: GameConfigProps) {
       </div>
 
       <div className="add-game-form">
-        <input
-          type="text"
-          placeholder="Game Name"
+        <select
           value={gameName}
           onChange={e => setGameName(e.target.value)}
           className="input-field"
-        />
+          disabled={availableGames.length === 0}
+        >
+          {availableGames.length === 0 ? (
+            <option value="">All supported games are already configured</option>
+          ) : (
+            availableGames.map(name => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))
+          )}
+        </select>
         <input
           type="text"
           placeholder="Game Mods Directory"
@@ -139,7 +165,11 @@ function GameConfig({ config, onUpdate }: GameConfigProps) {
         <button className="btn btn-secondary" onClick={handleBrowseModsDir} type="button">
           Browse...
         </button>
-        <button className="btn btn-primary" onClick={handleAddGame}>
+        <button
+          className="btn btn-primary"
+          onClick={handleAddGame}
+          disabled={availableGames.length === 0}
+        >
           + Add Game
         </button>
       </div>
