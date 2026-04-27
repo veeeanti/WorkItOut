@@ -58,7 +58,7 @@
       "icon": "build/icon.ico",
       "publisherName": "veeeanti",
       "legalTrademarks": "UnionCrax",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": true
     },
     "nsis": {
       "oneClick": false,
@@ -72,7 +72,8 @@
     },
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "tar.gz"
       ],
       "icon": "build/icon.png",
       "category": "Utility"
